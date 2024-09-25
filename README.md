@@ -1,6 +1,8 @@
 # ai-pm
 https://suno.com/song/c961c101-de9f-4135-a0a9-1140e623ff83
 https://suno.com/song/5f3906a4-2628-4a30-9ce6-d9d559ce2b18
+![6 men](https://github.com/user-attachments/assets/d81138f9-600c-499b-a527-7ec37f03a211)
+
 ![image](https://github.com/user-attachments/assets/3c8b636a-6a58-43f2-9e52-8fefbcfb38c3)
 
 ![image](https://github.com/user-attachments/assets/8fc6d4ef-577b-455d-971a-0e03fa17e0e5)
