@@ -449,3 +449,74 @@ private static byte[] ReadInteger(BinaryReader reader)
     
     return integer;
 }
+
+
+
+private static RSAParameters GetRSAParametersFromPrivateKey(string privateKeyPem)
+{
+    var privateKeyBytes = Convert.FromBase64String(
+        privateKeyPem.Replace("-----BEGIN PRIVATE KEY-----", "")
+                     .Replace("-----END PRIVATE KEY-----", "")
+                     .Replace("\n", "")
+                     .Replace("\r", ""));
+
+    // Check for PKCS#8 format
+    if (privateKeyBytes[0] != 0x30) // ASN.1 sequence
+    {
+        throw new InvalidOperationException("Invalid private key format.");
+    }
+
+    using (var ms = new System.IO.MemoryStream(privateKeyBytes))
+    using (var reader = new BinaryReader(ms))
+    {
+        // Skip the version and read to the next sequence
+        reader.ReadByte(); // Sequence
+        reader.ReadUInt16(); // Length
+        reader.ReadByte(); // Version
+
+        // Read the Algorithm Identifier
+        reader.ReadByte(); // Sequence
+        reader.ReadUInt16(); // Length
+        reader.ReadByte(); // OID Identifier
+        reader.ReadByte(); // Length of the OID
+
+        // Skip OID (usually for the RSA algorithm)
+        while (reader.PeekChar() != -1) reader.ReadByte(); // Skip to the next section
+
+        // Now we should be at the private key data, which is another sequence
+        reader.ReadByte(); // Sequence
+        reader.ReadUInt16(); // Length
+
+        // Read the private key integers
+        RSAParameters parameters = new RSAParameters
+        {
+            Modulus = ReadInteger(reader),  // Usually not present in PKCS#8, need to derive from the private key
+            Exponent = ReadInteger(reader),  // Not present
+            D = ReadInteger(reader),
+            P = ReadInteger(reader),
+            Q = ReadInteger(reader),
+            DP = ReadInteger(reader),
+            DQ = ReadInteger(reader),
+            InverseQ = ReadInteger(reader)
+        };
+
+        return parameters;
+    }
+}
+
+
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Crypto.Parameters;
+
+private static RSAParameters GetRSAParametersFromPrivateKey(string privateKeyPem)
+{
+    using (var stringReader = new System.IO.StringReader(privateKeyPem))
+    {
+        var pemReader = new PemReader(stringReader);
+        var keyPair = (AsymmetricCipherKeyPair)pemReader.ReadObject();
+        var privateKey = (RsaPrivateCrtKeyParameters)keyPair.Private;
+
+        return DotNetUtilities.ToRSAParameters(privateKey);
+    }
+}
