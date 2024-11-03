@@ -87,10 +87,8 @@ public class SuperTokenUpdater
             x5t = Convert.ToBase64String(hash).Replace("=", "").Replace("+", "-").Replace("/", "_");
         }
 
-        // Create the signing key
-        var keyBytes = Convert.FromBase64String(privateKey);
-        var rsa = RSA.Create();
-        rsa.ImportRSAPrivateKey(keyBytes, out _);
+        // Initialize RSA key
+        RSA rsa = CreateRsaFromPrivateKey(privateKey);
         var securityKey = new RsaSecurityKey(rsa) { KeyId = thumbPrint };
 
         // Define the JWT payload
@@ -119,5 +117,29 @@ public class SuperTokenUpdater
         var handler = new JwtSecurityTokenHandler();
         return handler.WriteToken(jwtToken);
     }
-}
 
+    private static RSA CreateRsaFromPrivateKey(string privateKey)
+    {
+        // Decode from base64 if needed
+        byte[] privateKeyBytes = Convert.FromBase64String(privateKey);
+
+        var rsa = RSA.Create();
+        
+        try
+        {
+            rsa.ImportRSAPrivateKey(privateKeyBytes, out _); // .NET Core or .NET 5+
+        }
+        catch
+        {
+            // For .NET Framework or older .NET versions, manually load the key
+            var rsaParameters = new RSAParameters();
+            
+            // You can parse and set the RSA parameters manually here if in another format,
+            // or use libraries like BouncyCastle for PEM decoding in .NET Framework
+
+            rsa.ImportParameters(rsaParameters);
+        }
+
+        return rsa;
+    }
+}
