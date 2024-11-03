@@ -249,6 +249,7 @@ public class SuperTokenUpdater
 
 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -305,8 +306,7 @@ public class AzureOAuthHelper
 
     private string GenerateClientAssertion()
     {
-        var rsa = RSA.Create();
-        rsa.ImportFromPem(privateKey.ToCharArray());
+        var rsa = CreateRsaProviderFromPrivateKey(privateKey);
 
         var securityKey = new RsaSecurityKey(rsa) { KeyId = thumbprint };
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
@@ -320,4 +320,68 @@ public class AzureOAuthHelper
 
         return handler.WriteToken(token);
     }
+
+    private static RSA CreateRsaProviderFromPrivateKey(string privateKeyPem)
+    {
+        var rsaParameters = GetRSAParametersFromPrivateKey(privateKeyPem);
+        var rsa = new RSACryptoServiceProvider();
+        rsa.ImportParameters(rsaParameters);
+        return rsa;
+    }
+
+    private static RSAParameters GetRSAParametersFromPrivateKey(string privateKeyPem)
+    {
+        // Strip the headers from the PEM file
+        var privateKeyBytes = Convert.FromBase64String(
+            privateKeyPem.Replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                         .Replace("-----END RSA PRIVATE KEY-----", "")
+                         .Replace("\n", "")
+                         .Replace("\r", ""));
+
+        using (var mem = new System.IO.MemoryStream(privateKeyBytes))
+        using (var reader = new BinaryReader(mem))
+        {
+            byte[] twoBytes = reader.ReadBytes(2);
+            if (twoBytes[0] == 0x30 && twoBytes[1] == 0x82)
+            {
+                reader.ReadInt16(); // Skip the version marker
+            }
+
+            var rsaParameters = new RSAParameters
+            {
+                Modulus = ReadInteger(reader),
+                Exponent = ReadInteger(reader),
+                D = ReadInteger(reader),
+                P = ReadInteger(reader),
+                Q = ReadInteger(reader),
+                DP = ReadInteger(reader),
+                DQ = ReadInteger(reader),
+                InverseQ = ReadInteger(reader)
+            };
+
+            return rsaParameters;
+        }
+    }
+
+    private static byte[] ReadInteger(BinaryReader reader)
+    {
+        if (reader.ReadByte() != 0x02)
+            throw new InvalidOperationException("Expected an ASN.1 integer");
+
+        int count = reader.ReadByte();
+        if (count == 0x81)
+            count = reader.ReadByte();
+        else if (count == 0x82)
+            count = 256 * reader.ReadByte() + reader.ReadByte();
+
+        byte[] integer = reader.ReadBytes(count);
+        if (integer[0] == 0x00)
+        {
+            byte[] tmp = new byte[integer.Length - 1];
+            Array.Copy(integer, 1, tmp, 0, tmp.Length);
+            integer = tmp;
+        }
+        return integer;
+    }
 }
+
