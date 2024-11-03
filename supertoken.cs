@@ -520,3 +520,29 @@ private static RSAParameters GetRSAParametersFromPrivateKey(string privateKeyPem
         return DotNetUtilities.ToRSAParameters(privateKey);
     }
 }
+
+
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+public static class X5tGenerator
+{
+    public static string GenerateX5t(string thumbPrint)
+    {
+        // Convert the thumbprint string to a byte array
+        byte[] thumbPrintBytes = Encoding.UTF8.GetBytes(thumbPrint);
+
+        // Compute SHA-1 hash of the thumbprint bytes
+        using (var sha1 = SHA1.Create())
+        {
+            byte[] hashBytes = sha1.ComputeHash(thumbPrintBytes);
+
+            // Convert the hash to base64 and replace URL-unsafe characters
+            return Convert.ToBase64String(hashBytes)
+                          .Replace("=", "") // Remove any padding
+                          .Replace("+", "-") // URL-safe base64 character
+                          .Replace("/", "_"); // URL-safe base64 character
+        }
+    }
+}
