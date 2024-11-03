@@ -523,15 +523,17 @@ private static RSAParameters GetRSAParametersFromPrivateKey(string privateKeyPem
 
 
 using System;
+using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 
 public static class X5tGenerator
 {
-    public static string GenerateX5t(string thumbPrint)
+    public static string GenerateX5t(string thumbPrintHex)
     {
-        // Convert the thumbprint string to a byte array
-        byte[] thumbPrintBytes = Encoding.UTF8.GetBytes(thumbPrint);
+        // Convert the hex string thumbprint to a byte array
+        byte[] thumbPrintBytes = Enumerable.Range(0, thumbPrintHex.Length / 2)
+                                           .Select(i => Convert.ToByte(thumbPrintHex.Substring(i * 2, 2), 16))
+                                           .ToArray();
 
         // Compute SHA-1 hash of the thumbprint bytes
         using (var sha1 = SHA1.Create())
@@ -540,9 +542,10 @@ public static class X5tGenerator
 
             // Convert the hash to base64 and replace URL-unsafe characters
             return Convert.ToBase64String(hashBytes)
-                          .Replace("=", "") // Remove any padding
-                          .Replace("+", "-") // URL-safe base64 character
-                          .Replace("/", "_"); // URL-safe base64 character
+                          .Replace("=", "") // Remove padding
+                          .Replace("+", "-") // Make URL-safe
+                          .Replace("/", "_"); // Make URL-safe
         }
     }
 }
+
