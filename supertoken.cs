@@ -147,13 +147,14 @@ public class SuperTokenUpdater
 
 ------------------------------------
 
-    using System;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
-using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
-using System.Linq;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
+using System.IO;
 
 public class SuperTokenUpdater
 {
@@ -171,7 +172,7 @@ public class SuperTokenUpdater
             x5t = Convert.ToBase64String(hash).Replace("=", "").Replace("+", "-").Replace("/", "_");
         }
 
-        // Initialize RSA key
+        // Initialize RSA key using BouncyCastle
         RSA rsa = CreateRsaFromPrivateKey(privateKey);
         var securityKey = new RsaSecurityKey(rsa) { KeyId = thumbPrint };
 
@@ -204,38 +205,46 @@ public class SuperTokenUpdater
 
     private static RSA CreateRsaFromPrivateKey(string privateKey)
     {
-        // Remove the PEM header, footer, and newlines
-        var pem = privateKey
-            .Replace("-----BEGIN PRIVATE KEY-----", "")
-            .Replace("-----END PRIVATE KEY-----", "")
-            .Replace("\n", "")
-            .Replace("\r", "");
+        // Clean up the PEM format
+        privateKey = privateKey.Replace("-----BEGIN PRIVATE KEY-----", "")
+                               .Replace("-----END PRIVATE KEY-----", "")
+                               .Replace("\n", "")
+                               .Replace("\r", "");
 
-        // Decode the Base64 content
-        byte[] privateKeyBytes = Convert.FromBase64String(pem);
+        byte[] privateKeyBytes = Convert.FromBase64String(privateKey);
 
-        // Parse the RSA private key
-        var rsa = DecodeRsaPrivateKey(privateKeyBytes);
-        return rsa;
-    }
+        // Decode the RSA parameters using BouncyCastle
+        RSAParameters rsaParams = DecodeRsaPrivateKeyParameters(privateKeyBytes);
 
-    private static RSA DecodeRsaPrivateKey(byte[] privateKeyBytes)
-    {
-        // This is for .NET Framework; manually parse the ASN.1 DER-encoded private key if necessary.
-        var rsa = new RSACryptoServiceProvider();
-        
-        // Use helper to import private key parameters
-        var rsaParameters = DecodeRSAPrivateKeyParameters(privateKeyBytes);
-        rsa.ImportParameters(rsaParameters);
+        // Create RSA object and import parameters
+        var rsa = RSA.Create();
+        rsa.ImportParameters(rsaParams);
 
         return rsa;
     }
 
-    private static RSAParameters DecodeRSAPrivateKeyParameters(byte[] privateKeyBytes)
+    private static RSAParameters DecodeRsaPrivateKeyParameters(byte[] privateKeyBytes)
     {
-        // Decode the ASN.1 format (PKCS#1 DER encoding) to extract RSA parameters
-        // For simplicity, you may want to use a library like BouncyCastle for this
-        throw new NotImplementedException("ASN.1 parsing required here.");
+        using (var memStream = new MemoryStream(privateKeyBytes))
+        using (var reader = new StreamReader(memStream))
+        {
+            var pemReader = new PemReader(reader);
+            if (!(pemReader.ReadObject() is RsaPrivateCrtKeyParameters rsaPrivateKey))
+                throw new ArgumentException("Invalid private key format.");
+
+            return new RSAParameters
+            {
+                Modulus = rsaPrivateKey.Modulus.ToByteArrayUnsigned(),
+                Exponent = rsaPrivateKey.PublicExponent.ToByteArrayUnsigned(),
+                D = rsaPrivateKey.Exponent.ToByteArrayUnsigned(),
+                P = rsaPrivateKey.P.ToByteArrayUnsigned(),
+                Q = rsaPrivateKey.Q.ToByteArrayUnsigned(),
+                DP = rsaPrivateKey.DP.ToByteArrayUnsigned(),
+                DQ = rsaPrivateKey.DQ.ToByteArrayUnsigned(),
+                InverseQ = rsaPrivateKey.QInv.ToByteArrayUnsigned()
+            };
+        }
     }
 }
+
 
