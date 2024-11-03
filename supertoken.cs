@@ -385,3 +385,67 @@ public class AzureOAuthHelper
     }
 }
 
+================================
+
+    private static RSAParameters GetRSAParametersFromPrivateKey(string privateKeyPem)
+{
+    var privateKeyBytes = Convert.FromBase64String(
+        privateKeyPem.Replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                     .Replace("-----END RSA PRIVATE KEY-----", "")
+                     .Replace("\n", "")
+                     .Replace("\r", ""));
+
+    // Check for the PKCS#1 format
+    if (privateKeyBytes[0] != 0x30) // ASN.1 sequence
+    {
+        throw new InvalidOperationException("Invalid private key format.");
+    }
+
+    using (var ms = new System.IO.MemoryStream(privateKeyBytes))
+    using (var reader = new BinaryReader(ms))
+    {
+        reader.ReadByte(); // Sequence
+        reader.ReadUInt16(); // Length
+
+        var version = reader.ReadByte(); // Version
+        if (version != 0x00) throw new InvalidOperationException("Invalid version.");
+
+        RSAParameters parameters = new RSAParameters();
+
+        parameters.Modulus = ReadInteger(reader);
+        parameters.Exponent = ReadInteger(reader);
+        parameters.D = ReadInteger(reader);
+        parameters.P = ReadInteger(reader);
+        parameters.Q = ReadInteger(reader);
+        parameters.DP = ReadInteger(reader);
+        parameters.DQ = ReadInteger(reader);
+        parameters.InverseQ = ReadInteger(reader);
+
+        return parameters;
+    }
+}
+
+private static byte[] ReadInteger(BinaryReader reader)
+{
+    byte firstByte = reader.ReadByte();
+    if (firstByte != 0x02)
+        throw new InvalidOperationException("Expected an ASN.1 integer");
+
+    int length = reader.ReadByte();
+    if (length == 0x81)
+        length = reader.ReadByte();
+    else if (length == 0x82)
+        length = (reader.ReadByte() << 8) + reader.ReadByte();
+
+    byte[] integer = reader.ReadBytes(length);
+    
+    // Remove leading zero byte, if present
+    if (integer.Length > 0 && integer[0] == 0)
+    {
+        byte[] tmp = new byte[integer.Length - 1];
+        Array.Copy(integer, 1, tmp, 0, tmp.Length);
+        integer = tmp;
+    }
+    
+    return integer;
+}
