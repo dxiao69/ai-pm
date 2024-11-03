@@ -248,3 +248,76 @@ public class SuperTokenUpdater
 }
 
 
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+
+public class AzureOAuthHelper
+{
+    private readonly string clientId;
+    private readonly string tenantId;
+    private readonly string privateKey;
+    private readonly string thumbprint;
+
+    public AzureOAuthHelper(string clientId, string tenantId, string privateKey, string thumbprint)
+    {
+        this.clientId = clientId;
+        this.tenantId = tenantId;
+        this.privateKey = privateKey;
+        this.thumbprint = thumbprint;
+    }
+
+    public async Task<string> RedeemAuthorizationCodeAsync(string authorizationCode, string redirectUri, string scope)
+    {
+        string tokenEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
+
+        // Create client assertion
+        var clientAssertion = GenerateClientAssertion();
+
+        using (var client = new HttpClient())
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("client_id", clientId),
+                new KeyValuePair<string, string>("scope", scope),
+                new KeyValuePair<string, string>("code", authorizationCode),
+                new KeyValuePair<string, string>("redirect_uri", redirectUri),
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                new KeyValuePair<string, string>("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
+                new KeyValuePair<string, string>("client_assertion", clientAssertion)
+            });
+
+            request.Content = content;
+
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            return jsonResponse; // This will include the access token
+        }
+    }
+
+    private string GenerateClientAssertion()
+    {
+        var rsa = RSA.Create();
+        rsa.ImportFromPem(privateKey.ToCharArray());
+
+        var securityKey = new RsaSecurityKey(rsa) { KeyId = thumbprint };
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
+
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.CreateJwtSecurityToken(
+            issuer: clientId,
+            audience: $"https://login.microsoftonline.com/{tenantId}/v2.0",
+            expires: DateTime.UtcNow.AddMinutes(10),
+            signingCredentials: credentials);
+
+        return handler.WriteToken(token);
+    }
+}
