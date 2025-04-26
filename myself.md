@@ -3,7 +3,7 @@
 ## What do you enjoy doing outside of work?
 Outside of work, I’m a full-on tech adventurer. I love exploring new technologies, especially anything to do with machine learning. There’s nothing better than setting up new tools on my own machine — no rules, no limits, just pure, hands-on discovery.
 
-Way back in 2017, I was already trying to teach Python how to read a giant list of MIDI files and compose music in different styles. (Basically trying to create AI music before it was cool — sorry, Suno and Udio, I was here first!) I eventually let that project go, but my passion for AI only grew.
+Way back in 2015, I was already trying to teach Python how to read a giant list of MIDI files and compose music in different styles. (Basically trying to create AI music before it was cool — sorry, Suno and Udio, I was here first!) I eventually let that project go, but my passion for AI only grew.
 
 Now, I’m all about generating pictures, videos, music, and of course, tons of writing. I’ve trained Llama2 and Qwen to write like Shakespeare — and honestly, they didn’t do too badly at the whole "thee" and "thou" thing!
 
