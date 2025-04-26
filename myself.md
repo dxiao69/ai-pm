@@ -20,5 +20,9 @@ I'd just build whatever cool idea came to mind — AI plugins, creative tools, f
 My proudest achievement is being the first author on a U.S. patent for a system that helps companies plan and manage their tech inventory more efficiently. It came from solving a real problem — making sure hardware like laptops and devices were ready at different locations without wasting time or resources. It feels great to know that something I helped create is now officially patented and making a real impact.
 ## What activities is on the top of your bucket list?
 At the top of my bucket list might be introducing new AI models to cooking — imagine having a smart algorithm as your sous-chef, guiding you through recipes or even suggesting unexpected flavor combos. It’s like blending tech with taste!
+![image](https://github.com/user-attachments/assets/3cb2cadf-12d4-4ea3-9ed0-49934a1478b7)
+
 ## What is one thing your EUS peers would not know about you?
 One thing my working peers might not know about me is that I actually enjoy getting my hands dirty with hardware and tinkering with tech setups. Whether it’s building custom setups, configuring new devices, or experimenting with unique tools, I love the process of hands-on problem-solving. It’s like giving my brain a workout outside of code and systems.
+
+![mmexport1745696609080](https://github.com/user-attachments/assets/28e92c91-c703-458d-9abb-1c421d55e3a5)
