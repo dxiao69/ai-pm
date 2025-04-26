@@ -1,11 +1,12 @@
-![mmexport1745696558099](https://github.com/user-attachments/assets/b67c11cf-6b96-4de1-a053-1396e1e15ef0)
 
+
+![mmexport1745696604834](https://github.com/user-attachments/assets/cb73703c-b55f-4ff9-b053-bd5af656f7d8)
 
 ## What is your role in EUS?
 
 ## What do you enjoy doing outside of work?
 Outside of work, I’m a full-on tech adventurer. I love exploring new technologies, especially anything to do with machine learning. There’s nothing better than setting up new tools on my own machine — no rules, no limits, just pure, hands-on discovery.
-
+![mmexport1745696558099](https://github.com/user-attachments/assets/b67c11cf-6b96-4de1-a053-1396e1e15ef0)
 Way back in 2015, I was already trying to teach Python how to read a giant list of MIDI files and compose music in different styles. (Basically trying to create AI music before it was cool — sorry, Suno and Udio, I was here first!) I eventually let that project go, but my passion for AI only grew.
 
 Now, I’m all about generating pictures, videos, music, and of course, tons of writing. I’ve trained Llama2 and Qwen to write like Shakespeare — and honestly, they didn’t do too badly at the whole "thee" and "thou" thing!
