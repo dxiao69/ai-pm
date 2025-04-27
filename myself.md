@@ -27,3 +27,8 @@ One thing my working peers might not know about me is that I actually enjoy gett
 ![wx_camera_1693420464419](https://github.com/user-attachments/assets/7f68225d-e21a-4639-9206-8d52cd6526c4)
 
 ![mmexport1745696609080](https://github.com/user-attachments/assets/28e92c91-c703-458d-9abb-1c421d55e3a5)
+
+![IMG_20190801_153453](https://github.com/user-attachments/assets/b268c032-a43d-4b9c-9e2c-08185d8694d5)
+
+
+![IMG_20190801_184633](https://github.com/user-attachments/assets/cdaaa7eb-8f73-4ec6-aa52-003211a728f4)
