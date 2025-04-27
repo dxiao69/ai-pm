@@ -24,5 +24,6 @@ At the top of my bucket list might be introducing new AI models to cooking — i
 
 ## What is one thing your EUS peers would not know about you?
 One thing my working peers might not know about me is that I actually enjoy getting my hands dirty with hardware and tinkering with tech setups. Whether it’s building custom setups, configuring new devices, or experimenting with unique tools, I love the process of hands-on problem-solving. It’s like giving my brain a workout outside of code and systems.
+![wx_camera_1693420464419](https://github.com/user-attachments/assets/7f68225d-e21a-4639-9206-8d52cd6526c4)
 
 ![mmexport1745696609080](https://github.com/user-attachments/assets/28e92c91-c703-458d-9abb-1c421d55e3a5)
